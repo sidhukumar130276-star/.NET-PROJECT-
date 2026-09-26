@@ -1,0 +1,173 @@
+login.aspx.cs
+using System;
+using System.Web;
+
+namespace Practical_5
+{
+    public partial class login : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                if (Request.Cookies["UserCookie"] != null)
+                {
+                    txtUsername.Text = Request.Cookies["UserCookie"]["Username"];
+                    chkRemember.Checked = true;
+                }
+            }
+        }
+
+        protected void btnLogin_Click(object sender, EventArgs e)
+        {
+            if (txtUsername.Text == "student" && txtPassword.Text == "1234")
+            {
+                Session["Username"] = txtUsername.Text;
+
+                if (chkRemember.Checked)
+                {
+                    HttpCookie cookie = new HttpCookie("UserCookie");
+                    cookie["Username"] = txtUsername.Text;
+                    cookie.Expires = DateTime.Now.AddDays(7);
+                    Response.Cookies.Add(cookie);
+                }
+                else
+                {
+                    if (Request.Cookies["UserCookie"] != null)
+                    {
+                        HttpCookie cookie = new HttpCookie("UserCookie");
+                        cookie.Expires = DateTime.Now.AddDays(-1);
+                        Response.Cookies.Add(cookie);
+                    }
+                }
+
+                Response.Redirect("default.aspx");
+            }
+            else
+            {
+                lblMessage.Text = "Invalid username or password";
+            }
+        }
+    }      
+}
+using System;
+
+namespace Practical_5
+{
+    public partial class _default : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (Session["Username"] == null)
+            {
+                Response.Redirect("login.aspx");
+            }
+
+            if (!IsPostBack)
+            {
+                lblUsername.Text = Session["Username"].ToString();
+            }
+        }
+
+        protected void btnSubmit_Click(object sender, EventArgs e)
+        {
+            if (txtStudentName.Text == "")
+            {
+                lblMessage.Text = "Please enter student name";
+                return;
+            }
+
+            if (calLeaveDate.SelectedDate == DateTime.MinValue)
+            {
+                lblMessage.Text = "Please select leave date";
+                return;
+            }
+
+            if (ddlLeaveType.SelectedIndex == 0)
+            {
+                lblMessage.Text = "Please select leave type";
+                return;
+            }
+
+            Session["StudentName"] = txtStudentName.Text;
+            Session["LeaveDate"] = calLeaveDate.SelectedDate.ToShortDateString();
+            Session["LeaveType"] = ddlLeaveType.SelectedValue;
+            Session["Reason"] = txtReason.Text;
+
+            Response.Redirect("leave.aspx");
+        }
+    }
+}
+
+using System;
+
+namespace Practical_5
+{
+    public partial class leave : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (Session["Username"] == null)
+            {
+                Response.Redirect("login.aspx");
+                return;
+            }
+
+            if (!IsPostBack)
+            {
+                lblUsername.Text = Session["Username"].ToString();
+                if (Session["StudentName"] != null) lblStudentName.Text = Session["StudentName"].ToString();
+                if (Session["LeaveDate"] != null) lblLeaveDate.Text = Session["LeaveDate"].ToString();
+                if (Session["LeaveType"] != null) lblLeaveType.Text = Session["LeaveType"].ToString();
+                if (Session["Reason"] != null) lblReason.Text = Session["Reason"].ToString();
+            }
+        }
+
+        protected void btnLogout_Click(object sender, EventArgs e)
+        {
+            Session.Clear();
+            Session.Abandon();
+            Response.Redirect("login.aspx");
+        }
+    }
+}
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="login.aspx.cs" Inherits="Practical_5.login" %>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>Login</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <h2>Login Page</h2>
+            Username: <asp:TextBox ID="txtUsername" runat="server"></asp:TextBox><br /><br />
+            Password: <asp:TextBox ID="txtPassword" runat="server" TextMode="Password"></asp:TextBox><br /><br />
+            <asp:CheckBox ID="chkRemember" runat="server" Text="Remember Me" /><br /><br />
+            <asp:Button ID="btnLogin" runat="server" Text="Login" OnClick="btnLogin_Click" /><br /><br />
+            <asp:Label ID="lblMessage" runat="server"></asp:Label>
+        </div>
+    </form>
+</body>
+</html>
+leave.aspx
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="leave.aspx.cs" Inherits="Practical_5.leave" %>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>Leave Details</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <h2>Leave Details</h2>
+            Username: <asp:Label ID="lblUsername" runat="server"></asp:Label><br /><br />
+            Student Name: <asp:Label ID="lblStudentName" runat="server"></asp:Label><br /><br />
+            Leave Date: <asp:Label ID="lblLeaveDate" runat="server"></asp:Label><br /><br />
+            Leave Type: <asp:Label ID="lblLeaveType" runat="server"></asp:Label><br /><br />
+            Reason: <asp:Label ID="lblReason" runat="server"></asp:Label><br /><br />
+            <asp:Button ID="btnLogout" runat="server" Text="Logout" OnClick="btnLogout_Click" />
+        </div>
+    </form>
+</body>
+</html>
