@@ -1,0 +1,46 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace practical3_341
+{
+    class Expence
+    {
+        public int exp_id;
+        public string exp_catagory;
+        public int exp_amount;
+
+        public void add_exp()
+        {
+            try
+            {
+                exp_id = Convert.ToInt32(Console.ReadLine());
+                Console.Write("Expense Category: ");
+                exp_catagory = Console.ReadLine();
+                Console.Write("Expense Amount: ");
+                exp_amount = Convert.ToInt32(Console.ReadLine());
+
+                if (exp_amount < 0)
+                {
+                    throw new Exception("Expense amount cannot be negative.");
+                }
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Invalid input! Please enter numbers only.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public void display_exp()
+        {
+            Console.WriteLine("Expense ID : " + exp_id);
+            Console.WriteLine("Expense Category : " + exp_catagory);
+        }
+    }
+}
